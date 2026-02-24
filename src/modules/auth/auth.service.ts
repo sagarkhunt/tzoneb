@@ -1,12 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { Session } from '../../database/entities/session.entity';
+import { AuthConfig } from '../../config/auth.config';
+import { RefreshToken } from '../../database/entities/refresh-token.entity';
 import { User } from '../../database/entities/user.entity';
 import { BcryptService } from '../../services/bcrypt.service';
 import { OAuthPayload } from '../../types/jwt';
 import { LoginDto, SignupDto } from './auth.dto';
+
+type UserWithRoles = User & { userRoles?: { role: { role: string } }[] };
 
 @Injectable()
 export class AuthService {
@@ -14,7 +17,30 @@ export class AuthService {
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly bcryptService: BcryptService,
+    private readonly authConfig: AuthConfig,
   ) {}
+
+  private async generateRefreshToken(userId: string): Promise<string> {
+    const token = await this.jwtService.signAsync(
+      { sub: userId, type: 'refresh' },
+      {
+        secret: this.authConfig.jwtRefreshSecret,
+        expiresIn: this.authConfig.jwtRefreshExpiresIn,
+        algorithm: 'HS256',
+      } as Parameters<JwtService['signAsync']>[1],
+    );
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + this.authConfig.refreshTokenDays);
+
+    await this.dataSource.getRepository(RefreshToken).save({
+      token,
+      userId,
+      expiresAt,
+    });
+
+    return token;
+  }
 
   async signup(body: SignupDto) {
     const u = await this.dataSource.getRepository(User).findOneBy({
@@ -43,29 +69,70 @@ export class AuthService {
         firstName: true,
         lastName: true,
       },
+      relations: ['userRoles', 'userRoles.role'],
     });
 
-    if (!user) {
-      throw new BadRequestException('User not found');
+    if (!user) throw new BadRequestException('User not found');
+
+    if (!this.bcryptService.compareSync(password, user.password)) {
+      throw new BadRequestException('Invalid password');
     }
 
-    this.bcryptService.compareSync(password, user.password);
-
-    const session = await this.dataSource.getRepository(Session).save({ userId: user.id });
-
-    const payload: OAuthPayload = {
-      id: user.id,
-      email: user.email,
-      sessionId: session.id,
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: p, ..._user } = user;
-
-    return { ..._user, token: await this.jwtService.signAsync(payload) };
+    return this.issueTokensForUser(user as UserWithRoles);
   }
 
-  async logout(user: User, session: string) {
-    await this.dataSource.getRepository(Session).delete({ id: session, userId: user.id });
+  async refreshTokens(refreshToken: string) {
+    const tokenRecord = await this.dataSource.getRepository(RefreshToken).findOne({
+      where: { token: refreshToken },
+      relations: ['user', 'user.userRoles', 'user.userRoles.role'],
+    });
+
+    if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    await this.dataSource.getRepository(RefreshToken).delete({ id: tokenRecord.id });
+
+    const user = tokenRecord.user as UserWithRoles;
+    return this.issueTokensForUser(user);
+  }
+
+  private async issueTokensForUser(user: UserWithRoles) {
+    const roles = this.getRoleNames(user);
+    const signOptions = { expiresIn: this.authConfig.accessTokenExpiry } as Parameters<
+      JwtService['signAsync']
+    >[1];
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          id: user.id,
+          email: user.email,
+          roles,
+        } as OAuthPayload & { roles: string[] },
+        signOptions,
+      ),
+      this.generateRefreshToken(user.id),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        roles,
+      },
+    };
+  }
+
+  private getRoleNames(user: UserWithRoles): string[] {
+    return user.userRoles?.map((ur) => ur.role.role) ?? [];
+  }
+
+  async logout(user: User) {
+    await this.dataSource.getRepository(RefreshToken).delete({ userId: user.id });
   }
 }

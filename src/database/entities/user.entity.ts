@@ -9,7 +9,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { RefreshToken } from './refresh-token.entity';
-import { Session } from './session.entity';
 import { UserRole } from './user-role.entity';
 
 @Entity()
@@ -38,9 +37,6 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @OneToMany(() => Session, (session) => session.user)
-  sessions: Session[];
 
   @OneToMany(() => UserRole, (ur) => ur.user)
   userRoles: UserRole[];

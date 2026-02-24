@@ -1,12 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { FastifyRequest } from 'fastify';
 import { readFileSync } from 'fs';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { join } from 'path';
 import { DataSource } from 'typeorm';
-import { Session } from '../../database/entities/session.entity';
+import { User } from '../../database/entities/user.entity';
 import { OAuthPayload } from '../../types/jwt';
 
 @Injectable()
@@ -15,24 +14,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      passReqToCallback: true,
       secretOrKey: readFileSync(join(process.cwd(), 'jwt.key')),
       algorithms: ['ES256'],
     });
   }
 
-  async validate(request: FastifyRequest, payload: OAuthPayload) {
-    const session = await this.dataSource.getRepository(Session).findOne({
-      where: { id: payload.sessionId },
-      relations: ['user', 'user.userRoles', 'user.userRoles.role'],
+  async validate(payload: OAuthPayload) {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: { id: payload.id },
+      select: { id: true, email: true, firstName: true, lastName: true },
+      relations: ['userRoles', 'userRoles.role'],
     });
-    if (!session) throw new UnauthorizedException();
+    if (!user) throw new UnauthorizedException();
 
-    request.session = session.id;
-    if (!session.user) throw new UnauthorizedException();
-
-    const user = session.user as typeof session.user & { userRoles?: { role: { slug: string } }[] };
-    const roles = user.userRoles?.map((ur) => ur.role?.slug).filter(Boolean) ?? [];
+    const roles = (user as User & { userRoles?: { role: { slug: string } }[] }).userRoles
+      ?.map((ur) => ur.role?.slug)
+      .filter(Boolean) ?? [];
     return { ...user, roles };
   }
 }

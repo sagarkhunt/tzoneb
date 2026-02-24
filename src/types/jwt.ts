@@ -1,5 +1,11 @@
 export interface OAuthPayload {
   id: string;
   email: string;
-  sessionId: string;
+}
+
+export interface RefreshTokenPayload {
+  sub: string;
+  email: string;
+  type: 'refresh';
+  jti: string;
 }

@@ -2,10 +2,10 @@ import { Body, Controller, HttpCode, HttpStatus, Post, UsePipes } from '@nestjs/
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { User } from '../../database/entities/user.entity';
 import { Auth } from '../../decorators/auth.decorator';
-import { AuthSession, AuthUser } from '../../decorators/user.decorator';
+import { AuthUser } from '../../decorators/user.decorator';
 import { UserRole } from '../../enums/user.enum';
 import { ValidationPipe } from '../../pipes/validation.pipe';
-import { LoginDto, SignupDto } from './auth.dto';
+import { LoginDto, RefreshTokenDto, SignupDto } from './auth.dto';
 import { AuthService } from './auth.service';
 
 @Controller()
@@ -33,13 +33,22 @@ export class AuthController {
     };
   }
 
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiBody({ type: RefreshTokenDto })
+  async refresh(@Body() body: RefreshTokenDto) {
+    return {
+      data: await this.authService.refreshTokens(body.refreshToken),
+      message: 'Tokens refreshed',
+    };
+  }
+
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  // @Auth()
   @Auth([UserRole.USER, UserRole.ADMIN])
-  async logout(@AuthUser() user: User, @AuthSession() session: string) {
+  async logout(@AuthUser() user: User) {
     return {
-      data: await this.authService.logout(user, session),
+      data: await this.authService.logout(user),
       message: 'Logout successfull',
     };
   }
