@@ -27,9 +27,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
     if (!user) throw new UnauthorizedException();
 
-    const roles = (user as User & { userRoles?: { role: { slug: string } }[] }).userRoles
-      ?.map((ur) => ur.role?.slug)
-      .filter(Boolean) ?? [];
+    const roles =
+      (user as User & { userRoles?: { role: { slug: string } }[] }).userRoles
+        ?.map((ur) => ur.role?.slug)
+        .filter(Boolean) ?? [];
     return { ...user, roles };
   }
 }

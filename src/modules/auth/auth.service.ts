@@ -21,14 +21,11 @@ export class AuthService {
   ) {}
 
   private async generateRefreshToken(userId: string): Promise<string> {
-    const token = await this.jwtService.signAsync(
-      { sub: userId, type: 'refresh' },
-      {
-        secret: this.authConfig.jwtRefreshSecret,
-        expiresIn: this.authConfig.jwtRefreshExpiresIn,
-        algorithm: 'HS256',
-      } as Parameters<JwtService['signAsync']>[1],
-    );
+    const token = await this.jwtService.signAsync({ sub: userId, type: 'refresh' }, {
+      secret: this.authConfig.jwtRefreshSecret,
+      expiresIn: this.authConfig.jwtRefreshExpiresIn,
+      algorithm: 'HS256',
+    } as Parameters<JwtService['signAsync']>[1]);
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + this.authConfig.refreshTokenDays);
