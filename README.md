@@ -1,351 +1,126 @@
-# Demo - Production-Ready NestJS Backend
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
-A modern, scalable backend application built with NestJS, TypeScript, and a comprehensive tech stack designed for enterprise-grade applications.
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-## Tech Stack
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-| Purpose | Technology |
-|---------|-----------|
-| **Runtime** | Node.js 20 + TypeScript |
-| **Framework** | NestJS |
-| **Database** | PostgreSQL |
-| **ORM** | Prisma |
-| **Authentication** | JWT + RBAC |
-| **Validation** | Zod |
-| **Cache** | Redis |
-| **File Storage** | Azure Blob / AWS S3 |
-| **Queue** | BullMQ (Redis) |
-| **API Docs** | Swagger |
-| **Logging** | Winston |
+## Description
 
-## Features
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-- ✅ **Authentication & Authorization**: JWT-based auth with Role-Based Access Control (RBAC)
-- ✅ **Database**: PostgreSQL with Prisma ORM for type-safe database access
-- ✅ **Caching**: Redis integration for high-performance caching
-- ✅ **File Storage**: Azure Blob Storage / AWS S3 support
-- ✅ **Background Jobs**: BullMQ for async task processing
-- ✅ **API Documentation**: Auto-generated Swagger/OpenAPI docs
-- ✅ **Validation**: Zod schemas for request validation
-- ✅ **Logging**: Winston for structured logging
-- ✅ **Security**: Helmet, CORS, rate limiting
-- ✅ **Health Checks**: Database and service health monitoring
-- ✅ **Docker Support**: Full containerization with Docker Compose
-- ✅ **Testing**: Unit, integration, and E2E tests
-
-## Project Structure
-
-```
-src/
-├── main.ts                 # Application entry point
-├── app.module.ts           # Root module
-├── app.controller.ts       # Root controller
-├── app.service.ts          # Root service
-├── config/                 # Configuration modules
-│   ├── app.config.ts
-│   ├── database.config.ts
-│   ├── jwt.config.ts
-│   ├── redis.config.ts
-│   └── storage.config.ts
-├── common/                 # Shared utilities
-│   ├── decorators/         # Custom decorators
-│   ├── filters/            # Exception filters
-│   ├── guards/             # Auth & RBAC guards
-│   ├── interceptors/       # Request/response interceptors
-│   ├── pipes/              # Validation pipes
-│   └── schemas/            # Zod validation schemas
-├── modules/                # Feature modules
-│   ├── auth/               # Authentication module
-│   ├── users/              # Users module
-│   ├── storage/            # File storage module
-│   └── health/             # Health check module
-├── database/               # Database layer
-│   ├── prisma.service.ts
-│   └── database.module.ts
-└── queues/                 # Background job processors
-    ├── email.queue.ts
-    ├── file-processing.queue.ts
-    ├── notifications.queue.ts
-    └── cleanup.queue.ts
-```
-
-## Prerequisites
-
-- Node.js 20 or higher
-- PostgreSQL 15 or higher
-- Redis 7 or higher
-- Docker & Docker Compose (for containerized setup)
-
-## Getting Started
-
-### 1. Clone and Install
+## Project setup
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd demo
-
-# Install dependencies
-npm install
+$ npm install
 ```
 
-### 2. Environment Configuration
-
-Copy the `.env` file and configure your environment variables:
+## Compile and run the project
 
 ```bash
-# The .env file is already configured in src/.env
-# Update the following values as needed:
-# - JWT secrets (change from defaults!)
-# - Database credentials
-# - Redis connection
-# - Storage provider credentials (Azure or S3)
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
 ```
 
-### 3. Database Setup
+## Run tests
 
 ```bash
-# Generate Prisma Client
-npm run prisma:generate
+# unit tests
+$ npm run test
 
-# Run database migrations
-npm run prisma:migrate
+# e2e tests
+$ npm run test:e2e
 
-# Seed the database with initial data
-npm run prisma:seed
+# test coverage
+$ npm run test:cov
 ```
 
-This will create:
-- Admin user: `admin@example.com` / `admin123`
-- Roles: `admin`, `user`
+## Deployment
 
-### 4. Development Setup (Option A: Local)
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
 ```bash
-# Start PostgreSQL and Redis locally
-# Make sure they're running on default ports (5432 and 6379)
-
-# Start development server with hot reload
-npm run start:dev
+$ npm install -g mau
+$ mau deploy
 ```
 
-### 4. Development Setup (Option B: Docker Compose)
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
-```bash
-# Start only infrastructure services (PostgreSQL + Redis)
-docker-compose -f docker-compose.dev.yml up -d
+## Resources
 
-# Then run the app locally
-npm run start:dev
+Check out a few resources that may come in handy when working with NestJS:
 
-# Or start everything with Docker
-docker-compose up -d
-```
-
-### 5. Access the Application
-
-- **API**: http://localhost:5000
-- **API Documentation (Swagger)**: http://localhost:5000/api/docs
-- **Health Check**: http://localhost:5000/api/v1/health
-- **Redis Commander** (if using dev compose): http://localhost:8081
-
-## Available Scripts
-
-### Development
-```bash
-npm run start:dev      # Start with hot reload
-npm run start:debug    # Start with debug mode
-```
-
-### Production
-```bash
-npm run build          # Build for production
-npm run start:prod     # Start production server
-```
-
-### Database
-```bash
-npm run prisma:generate  # Generate Prisma Client
-npm run prisma:migrate   # Run migrations
-npm run prisma:studio    # Open Prisma Studio
-npm run prisma:seed      # Seed database
-```
-
-### Testing
-```bash
-npm run test           # Run unit tests
-npm run test:watch     # Run tests in watch mode
-npm run test:cov       # Run tests with coverage
-npm run test:e2e       # Run E2E tests
-```
-
-### Code Quality
-```bash
-npm run lint           # Lint code
-npm run format         # Format code with Prettier
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
-- `POST /api/v1/auth/refresh` - Refresh access token
-- `POST /api/v1/auth/logout` - Logout user
-
-### Users
-- `GET /api/v1/users` - Get all users (Admin only)
-- `GET /api/v1/users/:id` - Get user by ID
-- `PATCH /api/v1/users/:id` - Update user
-- `DELETE /api/v1/users/:id` - Delete user (Admin only)
-- `POST /api/v1/users/:userId/roles/:roleId` - Assign role (Admin only)
-
-### Storage
-- `POST /api/v1/storage/upload` - Upload file
-- `GET /api/v1/storage/files` - List all files
-- `DELETE /api/v1/storage/:filename` - Delete file
-- `GET /api/v1/storage/signed-url/:filename` - Get signed URL
-
-### Health
-- `GET /api/v1/health` - Application health status
-
-## Docker Deployment
-
-### Production Build
-
-```bash
-# Build the Docker image
-docker build -t demo-app .
-
-# Run with Docker Compose
-docker-compose up -d
-```
-
-### Development with Docker
-
-```bash
-# Start infrastructure only (PostgreSQL + Redis)
-docker-compose -f docker-compose.dev.yml up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-## Environment Variables
-
-Key environment variables (see `src/.env` for complete list):
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment | `development` |
-| `PORT` | Server port | `5000` |
-| `DATABASE_URL` | PostgreSQL connection string | - |
-| `JWT_SECRET` | JWT signing secret | - |
-| `JWT_REFRESH_SECRET` | Refresh token secret | - |
-| `REDIS_HOST` | Redis host | `localhost` |
-| `REDIS_PORT` | Redis port | `6379` |
-| `STORAGE_PROVIDER` | Storage provider (`azure` or `s3`) | `azure` |
-
-## Testing
-
-```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Test coverage
-npm run test:cov
-```
-
-## Security Features
-
-- **JWT Authentication**: Secure token-based authentication
-- **RBAC**: Role-based access control
-- **Rate Limiting**: Protection against brute force attacks
-- **Helmet**: Security headers
-- **CORS**: Configurable CORS policies
-- **Input Validation**: Zod schema validation
-- **Password Hashing**: bcrypt for secure password storage
-
-## Background Jobs
-
-The application includes several background job queues:
-
-- **Email Queue**: Async email sending
-- **File Processing Queue**: Image resizing, video transcoding
-- **Notifications Queue**: Push notifications, SMS
-- **Cleanup Queue**: Periodic cleanup of expired tokens and old logs
-
-## Logging
-
-Winston logger configured with:
-- Console output (colorized for development)
-- File rotation for errors
-- Combined logs file
-- Structured JSON logging in production
-
-## Health Monitoring
-
-Health check endpoint monitors:
-- Database connectivity
-- Redis connectivity
-- Application status
-
-Access at: `GET /api/v1/health`
-
-## Best Practices
-
-- **Type Safety**: Full TypeScript coverage with strict mode
-- **Dependency Injection**: Leveraging NestJS DI container
-- **Modular Architecture**: Feature-based module organization
-- **Error Handling**: Global exception filters
-- **API Documentation**: Swagger annotations on all endpoints
-- **Testing**: Comprehensive test coverage
-- **Code Quality**: ESLint + Prettier configuration
-
-## Troubleshooting
-
-### Database Connection Issues
-```bash
-# Check if PostgreSQL is running
-docker-compose ps
-
-# View database logs
-docker-compose logs postgres
-```
-
-### Redis Connection Issues
-```bash
-# Check if Redis is running
-docker-compose ps
-
-# Test Redis connection
-docker-compose exec redis redis-cli ping
-```
-
-### Port Already in Use
-```bash
-# Change PORT in .env file
-PORT=3000
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-ISC
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
 
 ## Support
 
-For issues and questions, please open an issue in the repository.
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+
+## Generate jwt keys
+```bash
+openssl ecparam -genkey -name prime256v1 -noout -out jwt.key
+openssl ec -in jwt.key -pubout -out jwt.key.pub
+```
+
+## Migration
+```bash
+npm run migration:run:local
+npm run migration:run
+
+npm run migration:create [MIGRATION NAME]
+```
+
+## Generate Module
+```bash
+nest g res modules/[Module Name]
+```
+
+## Create Admin User
+```
+npm run build
+
+node dist/commands create-admin-user -fn 'FirstName' -ln 'LastName' -e 'Email' -p 'Password' -u 'Username'
+```

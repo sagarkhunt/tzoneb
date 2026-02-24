@@ -1,11 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class AppService {
-  getStatus(): { message: string; timestamp: string } {
-    return {
-      message: 'Server is running',
-      timestamp: new Date().toISOString(),
-    };
+  getHello(): string {
+    return "Hello World!";
   }
 }

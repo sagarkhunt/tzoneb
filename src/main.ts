@@ -1,109 +1,92 @@
-import { config } from 'dotenv';
-import { resolve } from 'path';
-
-// Load env before app bootstrap (ConfigModule uses src/.env)
-config({ path: resolve(process.cwd(), 'src/.env') });
-config({ path: resolve(process.cwd(), '.env') });
-
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import compression from "@fastify/compress";
+import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
+import { VersioningType } from "@nestjs/common";
+import { HttpAdapterHost, NestFactory } from "@nestjs/core";
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from "@nestjs/platform-fastify";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { apiReference } from "@scalar/nestjs-api-reference";
+import { AppModule } from "./app.module";
+import { AppConfig } from "./config/app.config";
+import { HttpExceptionFilter } from "./exceptions/http.exception";
+import { ApiResponseInterceptor } from "./interceptors/api-response.interceptor";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bufferLogs: true,
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  );
+
+  const port = +app.get(AppConfig).port;
+
+  // Add Versioning
+  app.enableVersioning({
+    defaultVersion: "1",
+    prefix: "api/v",
+    type: VersioningType.URI,
   });
 
-  // Use Winston logger
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  // Add Helmet
+  await app.register(helmet, { global: true });
 
-  // Security - configure Helmet to allow cross-origin requests (CORS)
+  // Enable Cors
+  await app.register(cors, { origin: true });
+
+  // Add Compression
+  await app.register(compression, { threshold: 512 });
+
+  // Global Response Interceptor
+  app.useGlobalInterceptors(new ApiResponseInterceptor());
+
+  // Error Handler
+  app.useGlobalFilters(new HttpExceptionFilter(app.get(HttpAdapterHost)));
+
+  // Swagger
+  const config = new DocumentBuilder()
+    .setTitle("API Documentation")
+    .setDescription("API Documentation")
+    .setVersion("1.0")
+    .addBearerAuth()
+    .addServer(`http://localhost:${port}`)
+    .build();
+  const documentFactory = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup("api", app, documentFactory);
+
   app.use(
-    helmet({
-      crossOriginResourcePolicy: { policy: 'cross-origin' },
-      crossOriginEmbedderPolicy: false,
+    "/api/reference",
+    apiReference({
+      withFastify: true,
+      spec: { content: documentFactory },
+      metaData: {
+        title: "Api Documentation",
+        description: "Api Documentation",
+      },
+      persistAuth: true,
+      hideClientButton: true,
+      authentication: {
+        preferredSecurityScheme: "bearer",
+      },
+      theme: "laserwave",
     }),
   );
 
-  // CORS - must allow explicit origin when credentials: true (no wildcard)
-  const allowedOrigins = process.env.CORS_ORIGIN?.split(',')
-    .map((o) => o.trim())
-    .filter(Boolean) || [
-    'http://localhost:3000',
-    'http://localhost:4200',
-    'http://localhost:5173',
-    'http://localhost:5000',
-    'http://localhost:5001',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:4200',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5000',
-    'http://127.0.0.1:5001',
-  ];
-
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (process.env.NODE_ENV === 'development' && !origin) {
-        return callback(null, true);
-      }
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS blocked origin: ${origin}`));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Company-Id', 'Accept'],
-    exposedHeaders: ['Authorization'],
+  // Added for prevent crash server.
+  process.on("unhandledRejection", (error) => {
+    console.log("UNHANDLED REJECTION...", error);
   });
 
-  // Global prefix
-  app.setGlobalPrefix(process.env.API_PREFIX || 'api/v1');
-
-  // Global validation pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
-
-  // Swagger documentation (optional: disable in prod via SWAGGER_ENABLED=false)
-  const swaggerEnabled = process.env.SWAGGER_ENABLED !== 'false';
-  if (swaggerEnabled) {
-    const apiBaseUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 5001}`;
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle('TZone Travel API')
-      .setDescription(
-        'TZone Travel expense management backend API. Auth required for protected endpoints.',
-      )
-      .setVersion('1.0')
-      .addServer(apiBaseUrl)
-      .addBearerAuth()
-      .build();
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: { persistAuthorization: true },
-    });
-  }
-
-  // Graceful shutdown
-  app.enableShutdownHooks();
-
-  const port = process.env.PORT || 5001;
-  await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
-  if (swaggerEnabled) {
-    console.log(`Swagger documentation: http://localhost:${port}/api/docs`);
-  }
+  await app.listen({ port, host: "0.0.0.0" }, () => {
+    console.log(`################################################
+  🛡️  Server listening on port: http://0.0.0.0:${port} 🛡️
+################################################`);
+  });
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error("FAILED TO BOOTSTRAP APPLICATION:", err);
+  process.exit(1);
+});
