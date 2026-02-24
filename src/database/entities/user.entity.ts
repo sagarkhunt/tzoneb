@@ -8,6 +8,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Organization } from './organization.entity';
+import { Plan } from './plan.entity';
 import { RefreshToken } from './refresh-token.entity';
 import { UserRole } from './user-role.entity';
 
@@ -37,6 +39,12 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Organization, (org) => org.user)
+  organizations: Organization[];
+
+  @OneToMany(() => Plan, (plan) => plan.createdBy)
+  plansCreated: Plan[];
 
   @OneToMany(() => UserRole, (ur) => ur.user)
   userRoles: UserRole[];

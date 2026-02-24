@@ -1,18 +1,40 @@
+import { RoleName, RoleSlug } from '../../../enums/role.enum';
+
 /**
  * Roles to seed into the `roles` table.
- * Matches tzoneb copy Prisma seed: role (display name), slug (machine name), description.
+ * Uses RoleSlug and RoleName enums for consistency.
  */
 export const ROLES_SEED = [
   {
-    role: 'Super Admin',
-    slug: 'super_admin',
+    role: RoleName.SUPER_ADMIN,
+    slug: RoleSlug.SUPER_ADMIN,
     description: 'Super Administrator with full system access',
   },
-  { role: 'Admin', slug: 'admin', description: 'Administrator role with user management access' },
-  { role: 'Manager', slug: 'manager', description: 'Manager role with employee management access' },
-  { role: 'Finance', slug: 'finance', description: 'Finance role with financial data access' },
-  { role: 'Company', slug: 'company', description: 'Company role with organization-level access' },
-  { role: 'Employee', slug: 'employee', description: 'Employee role with basic user access' },
+  {
+    role: RoleName.ADMIN,
+    slug: RoleSlug.ADMIN,
+    description: 'Administrator role with user management access',
+  },
+  {
+    role: RoleName.MANAGER,
+    slug: RoleSlug.MANAGER,
+    description: 'Manager role with employee management access',
+  },
+  {
+    role: RoleName.FINANCE,
+    slug: RoleSlug.FINANCE,
+    description: 'Finance role with financial data access',
+  },
+  {
+    role: RoleName.COMPANY,
+    slug: RoleSlug.COMPANY,
+    description: 'Company role with organization-level access',
+  },
+  {
+    role: RoleName.EMPLOYEE,
+    slug: RoleSlug.EMPLOYEE,
+    description: 'Employee role with basic user access',
+  },
 ] as const;
 
 export type RoleSeedSlug = (typeof ROLES_SEED)[number]['slug'];
