@@ -1,5 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import bcrypt from "bcrypt";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class BcryptService {
@@ -7,15 +7,11 @@ export class BcryptService {
     return bcrypt.hashSync(password, 10);
   }
 
-  compareSync(
-    data: string | Buffer,
-    encrypted: string,
-    throwErrorOnFail = true,
-  ) {
+  compareSync(data: string | Buffer, encrypted: string, throwErrorOnFail = true) {
     const isValid = bcrypt.compareSync(data, encrypted);
 
     if (!isValid && throwErrorOnFail)
-      throw new HttpException("Invalid password.", HttpStatus.BAD_REQUEST);
+      throw new HttpException('Invalid password.', HttpStatus.BAD_REQUEST);
 
     return isValid;
   }

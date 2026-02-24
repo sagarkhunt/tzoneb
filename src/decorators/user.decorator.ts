@@ -1,28 +1,24 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { FastifyRequest } from "fastify";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { FastifyRequest } from 'fastify';
 
-export const AuthUser = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<FastifyRequest>();
-    const user = request.user;
+export const AuthUser = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest<FastifyRequest>();
+  const user = request.user;
 
-    if (!user) {
-      throw new Error("User not found in request");
-    }
+  if (!user) {
+    throw new Error('User not found in request');
+  }
 
-    return user;
-  },
-);
+  return user;
+});
 
-export const AuthSession = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<FastifyRequest>();
-    const session = request.session;
+export const AuthSession = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest<FastifyRequest>();
+  const session = request.session;
 
-    if (!session) {
-      throw new Error("Session not found in request");
-    }
+  if (!session) {
+    throw new Error('Session not found in request');
+  }
 
-    return session;
-  },
-);
+  return session;
+});

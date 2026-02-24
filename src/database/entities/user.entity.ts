@@ -1,4 +1,4 @@
-import { Exclude } from "class-transformer";
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -7,29 +7,29 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from "typeorm";
-import { UserRole } from "../../enums/user.enum";
-import { Session } from "./session.entity";
+} from 'typeorm';
+import { UserRole } from '../../enums/user.enum';
+import { Session } from './session.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: "character varying", unique: true })
+  @Column({ type: 'character varying', unique: true })
   email: string;
 
   @Exclude()
-  @Column({ type: "character varying", select: false })
+  @Column({ type: 'character varying', select: false })
   password: string;
 
-  @Column({ type: "character varying" })
+  @Column({ type: 'character varying' })
   firstName: string;
 
-  @Column({ type: "character varying" })
+  @Column({ type: 'character varying' })
   lastName: string;
 
-  @Column({ type: "enum", enum: UserRole, default: UserRole.USER })
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
   @DeleteDateColumn()

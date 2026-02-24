@@ -1,12 +1,12 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { Session } from "../../database/entities/session.entity";
-import { User } from "../../database/entities/user.entity";
-import { BcryptService } from "../../services/bcrypt.service";
-import { OAuthPayload } from "../../types/jwt";
-import { LoginDto, SignupDto } from "./auth.dto";
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { Session } from '../../database/entities/session.entity';
+import { User } from '../../database/entities/user.entity';
+import { BcryptService } from '../../services/bcrypt.service';
+import { OAuthPayload } from '../../types/jwt';
+import { LoginDto, SignupDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,10 +21,7 @@ export class AuthService {
       email: body.email,
     });
 
-    if (u)
-      throw new BadRequestException(
-        "Already signed up. Please login to continue",
-      );
+    if (u) throw new BadRequestException('Already signed up. Please login to continue');
 
     const user = this.dataSource.getRepository(User).create({
       ...body,
@@ -49,7 +46,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException("User not found");
+      throw new BadRequestException('User not found');
     }
 
     this.bcryptService.compareSync(password, user.password);
@@ -71,8 +68,6 @@ export class AuthService {
   }
 
   async logout(user: User, session: string) {
-    await this.dataSource
-      .getRepository(Session)
-      .delete({ id: session, userId: user.id });
+    await this.dataSource.getRepository(Session).delete({ id: session, userId: user.id });
   }
 }

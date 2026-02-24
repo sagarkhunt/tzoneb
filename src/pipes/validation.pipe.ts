@@ -5,18 +5,15 @@ import {
   Optional,
   PipeTransform,
   Type,
-} from "@nestjs/common";
-import { TransformerPackage } from "@nestjs/common/interfaces/external/transformer-package.interface";
-import { ValidatorPackage } from "@nestjs/common/interfaces/external/validator-package.interface";
-import {
-  ErrorHttpStatusCode,
-  HttpErrorByCode,
-} from "@nestjs/common/utils/http-error-by-code.util";
-import { loadPackage } from "@nestjs/common/utils/load-package.util";
-import { isNil, isUndefined } from "@nestjs/common/utils/shared.utils";
-import { ClassTransformOptions } from "class-transformer";
-import { ValidationError, ValidatorOptions } from "class-validator";
-import { types } from "util";
+} from '@nestjs/common';
+import { TransformerPackage } from '@nestjs/common/interfaces/external/transformer-package.interface';
+import { ValidatorPackage } from '@nestjs/common/interfaces/external/validator-package.interface';
+import { ErrorHttpStatusCode, HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
+import { loadPackage } from '@nestjs/common/utils/load-package.util';
+import { isNil, isUndefined } from '@nestjs/common/utils/shared.utils';
+import { ClassTransformOptions } from 'class-transformer';
+import { ValidationError, ValidatorOptions } from 'class-validator';
+import { types } from 'util';
 /**
  * @publicApi
  */
@@ -72,32 +69,23 @@ export class ValidationPipe implements PipeTransform<any> {
     this.validateCustomDecorators = validateCustomDecorators || false;
     this.errorHttpStatusCode = errorHttpStatusCode || HttpStatus.BAD_REQUEST;
     this.expectedType = expectedType;
-    this.exceptionFactory =
-      options.exceptionFactory || this.createExceptionFactory();
+    this.exceptionFactory = options.exceptionFactory || this.createExceptionFactory();
 
     classValidator = this.loadValidator(options.validatorPackage);
     classTransformer = this.loadTransformer(options.transformerPackage);
   }
 
-  protected loadValidator(
-    validatorPackage?: ValidatorPackage,
-  ): ValidatorPackage {
+  protected loadValidator(validatorPackage?: ValidatorPackage): ValidatorPackage {
     return (
       validatorPackage ??
-      loadPackage("class-validator", "ValidationPipe", () =>
-        require("class-validator"),
-      )
+      loadPackage('class-validator', 'ValidationPipe', () => require('class-validator'))
     );
   }
 
-  protected loadTransformer(
-    transformerPackage?: TransformerPackage,
-  ): TransformerPackage {
+  protected loadTransformer(transformerPackage?: TransformerPackage): TransformerPackage {
     return (
       transformerPackage ??
-      loadPackage("class-transformer", "ValidationPipe", () =>
-        require("class-transformer"),
-      )
+      loadPackage('class-transformer', 'ValidationPipe', () => require('class-transformer'))
     );
   }
 
@@ -108,9 +96,7 @@ export class ValidationPipe implements PipeTransform<any> {
 
     const metatype = metadata.metatype;
     if (!metatype || !this.toValidate(metadata)) {
-      return this.isTransformEnabled
-        ? this.transformPrimitive(value, metadata)
-        : value;
+      return this.isTransformEnabled ? this.transformPrimitive(value, metadata) : value;
     }
     const originalValue = value;
     value = this.toEmptyIfNil(value, metatype);
@@ -118,11 +104,7 @@ export class ValidationPipe implements PipeTransform<any> {
     const isNil = value !== originalValue;
     const isPrimitive = this.isPrimitive(value);
     this.stripProtoKeys(value);
-    let entity = classTransformer.plainToInstance(
-      metatype,
-      value,
-      this.transformOptions,
-    );
+    let entity = classTransformer.plainToInstance(metatype, value, this.transformOptions);
 
     const originalEntity = entity;
     const isCtorNotEqual = entity.constructor !== metatype;
@@ -141,7 +123,7 @@ export class ValidationPipe implements PipeTransform<any> {
       throw await this.exceptionFactory(errors);
     }
 
-    if (originalValue === undefined && originalEntity === "") {
+    if (originalValue === undefined && originalEntity === '') {
       // Since SWC requires empty string for validation (to avoid an error),
       // a fallback is needed to revert to the original value (when undefined).
       // @see https://github.com/nestjs/nest/issues/14430
@@ -162,8 +144,7 @@ export class ValidationPipe implements PipeTransform<any> {
 
     // we check if the number of keys of the "validatorOptions" is higher than 1 (instead of 0)
     // because the "forbidUnknownValues" now fallbacks to "false" (in case it wasn't explicitly specified)
-    const shouldTransformToPlain =
-      Object.keys(this.validatorOptions).length > 1;
+    const shouldTransformToPlain = Object.keys(this.validatorOptions).length > 1;
     return shouldTransformToPlain
       ? classTransformer.classToPlain(entity, this.transformOptions)
       : value;
@@ -181,7 +162,7 @@ export class ValidationPipe implements PipeTransform<any> {
 
   protected toValidate(metadata: ArgumentMetadata): boolean {
     const { metatype, type } = metadata;
-    if (type === "custom" && !this.validateCustomDecorators) {
+    if (type === 'custom' && !this.validateCustomDecorators) {
       return false;
     }
     const types = [String, Boolean, Number, Array, Object, Buffer, Date];
@@ -194,7 +175,7 @@ export class ValidationPipe implements PipeTransform<any> {
       return value;
     }
     const { type, metatype } = metadata;
-    if (type !== "param" && type !== "query") {
+    if (type !== 'param' && type !== 'query') {
       return value;
     }
     if (metatype === Boolean) {
@@ -205,7 +186,7 @@ export class ValidationPipe implements PipeTransform<any> {
         return undefined;
       }
       // Any fasly value but `undefined` will be parsed to `false`
-      return value === true || value === "true";
+      return value === true || value === 'true';
     }
     if (metatype === Number) {
       if (isUndefined(value)) {
@@ -230,8 +211,8 @@ export class ValidationPipe implements PipeTransform<any> {
       return value as any as R;
     }
     if (
-      typeof metatype === "function" ||
-      (metatype && "prototype" in metatype && metatype.prototype?.constructor)
+      typeof metatype === 'function' ||
+      (metatype && 'prototype' in metatype && metatype.prototype?.constructor)
     ) {
       return {} as object;
     }
@@ -239,15 +220,11 @@ export class ValidationPipe implements PipeTransform<any> {
     // when the value is nil and the metatype is not a class instance, but a plain object (enum, for example).
     // Otherwise, the error will be thrown.
     // @see https://github.com/nestjs/nest/issues/12680
-    return "";
+    return '';
   }
 
   protected stripProtoKeys(value: any) {
-    if (
-      value == null ||
-      typeof value !== "object" ||
-      types.isTypedArray(value)
-    ) {
+    if (value == null || typeof value !== 'object' || types.isTypedArray(value)) {
       return;
     }
     if (Array.isArray(value)) {
@@ -263,7 +240,7 @@ export class ValidationPipe implements PipeTransform<any> {
   }
 
   protected isPrimitive(value: unknown): boolean {
-    return ["number", "boolean", "string"].includes(typeof value);
+    return ['number', 'boolean', 'string'].includes(typeof value);
   }
 
   protected validate(
@@ -284,7 +261,7 @@ export class ValidationPipe implements PipeTransform<any> {
       return list;
     }, {});
 
-    return { message: "Validation Errors.", errors: meta };
+    return { message: 'Validation Errors.', errors: meta };
   }
 
   private childError(errors: ValidationError[]): any {
@@ -307,18 +284,12 @@ export class ValidationPipe implements PipeTransform<any> {
       return [error];
     }
     const validationErrors: ValidationError[] = [];
-    parentPath = parentPath
-      ? `${parentPath}.${error.property}`
-      : error.property;
+    parentPath = parentPath ? `${parentPath}.${error.property}` : error.property;
     for (const item of error.children) {
       if (item.children && item.children.length) {
-        validationErrors.push(
-          ...this.mapChildrenToValidationErrors(item, parentPath),
-        );
+        validationErrors.push(...this.mapChildrenToValidationErrors(item, parentPath));
       }
-      validationErrors.push(
-        this.prependConstraintsWithParentProp(parentPath, item),
-      );
+      validationErrors.push(this.prependConstraintsWithParentProp(parentPath, item));
     }
     return validationErrors;
   }
