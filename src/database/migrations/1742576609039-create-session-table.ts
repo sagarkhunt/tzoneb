@@ -19,16 +19,20 @@ export class CreateSessionTable1742576609039 implements MigrationInterface {
             default: 'uuid_generate_v1()',
           },
           { name: 'userId', type: 'uuid' },
-          { name: 'ipAddress', type: 'inet', isNullable: true },
+          {
+            name: 'deletedAt',
+            type: 'timestamp with time zone',
+            isNullable: true,
+          },
           {
             name: 'createdAt',
             type: 'timestamp with time zone',
-            default: 'now()',
+            default: 'CURRENT_TIMESTAMP',
           },
           {
             name: 'updatedAt',
             type: 'timestamp with time zone',
-            default: 'now()',
+            default: 'CURRENT_TIMESTAMP',
           },
         ],
         foreignKeys: [

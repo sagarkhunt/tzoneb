@@ -3,7 +3,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { Command, CommandRunner, Option } from 'nest-commander';
 import { DataSource } from 'typeorm';
 import { User } from '../database/entities/user.entity';
-import { UserRole } from '../enums/user.enum';
+import { UserRole as UserRoleEntity } from '../database/entities/user-role.entity';
+import { Role } from '../database/entities/role.entity';
 import { BcryptService } from '../services/bcrypt.service';
 
 @Command({
@@ -21,20 +22,29 @@ export class CreateAdminUserCommand extends CommandRunner {
   }
 
   async run(inputs: string[], payload: Record<string, string>): Promise<void> {
-    const user = await this.dataSource.getRepository(User).findOneBy({
-      email: payload.email,
-    });
+    const userRepo = this.dataSource.getRepository(User);
+    const user = await userRepo.findOneBy({ email: payload.email });
 
     if (user) throw new BadRequestException('Already signed up.');
 
-    const u = this.dataSource.getRepository(User).create({
+    const u = userRepo.create({
       ...payload,
       password: this.bcryptService.hashSync(payload.password),
-      role: UserRole.ADMIN,
     });
 
-    const _user = await this.dataSource.getRepository(User).save(u);
-    this.logger.warn(await this.dataSource.getRepository(User).findOneBy({ id: _user.id }));
+    const savedUser = await userRepo.save(u);
+
+    const role = await this.dataSource.getRepository(Role).findOneBy({ slug: 'admin' });
+    if (role) {
+      await this.dataSource.getRepository(UserRoleEntity).save({
+        userId: savedUser.id,
+        roleId: role.id,
+        addedById: null,
+        organizationId: null,
+      });
+    }
+
+    this.logger.warn(await userRepo.findOneBy({ id: savedUser.id }));
   }
 
   @Option({

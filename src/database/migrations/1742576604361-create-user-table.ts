@@ -1,5 +1,4 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
-import { UserRole } from '../../enums/user.enum';
 import { User } from '../entities/user.entity';
 
 export class CreateUserTable1742576604361 implements MigrationInterface {
@@ -22,11 +21,10 @@ export class CreateUserTable1742576604361 implements MigrationInterface {
           { name: 'firstName', type: 'varchar', isNullable: true },
           { name: 'lastName', type: 'varchar', isNullable: true },
           {
-            name: 'role',
-            type: 'enum',
-            enum: Object.values(UserRole) as string[],
-            enumName: 'UserRole',
-            default: `'${UserRole.USER}'`,
+            name: 'isActive',
+            type: 'boolean',
+            default: true,
+            isNullable: false,
           },
           {
             name: 'deletedAt',

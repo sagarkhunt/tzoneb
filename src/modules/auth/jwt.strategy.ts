@@ -24,13 +24,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(request: FastifyRequest, payload: OAuthPayload) {
     const session = await this.dataSource.getRepository(Session).findOne({
       where: { id: payload.sessionId },
-      relations: ['user'],
+      relations: ['user', 'user.userRoles', 'user.userRoles.role'],
     });
     if (!session) throw new UnauthorizedException();
 
     request.session = session.id;
     if (!session.user) throw new UnauthorizedException();
 
-    return session.user;
+    const user = session.user as typeof session.user & { userRoles?: { role: { slug: string } }[] };
+    const roles = user.userRoles?.map((ur) => ur.role?.slug).filter(Boolean) ?? [];
+    return { ...user, roles };
   }
 }

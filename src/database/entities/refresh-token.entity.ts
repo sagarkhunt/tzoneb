@@ -1,33 +1,33 @@
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
-@Entity()
-export class Session {
+@Entity('refresh_tokens')
+export class RefreshToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ type: 'text' })
+  token: string;
 
   @Index()
   @Column({ type: 'uuid' })
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.sessions, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.refreshTokens, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @DeleteDateColumn({ name: 'deletedAt' })
-  deletedAt: Date | null;
+  @Column({ type: 'timestamp with time zone', name: 'expiresAt' })
+  expiresAt: Date;
 
   @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updatedAt' })
-  updatedAt: Date;
 }

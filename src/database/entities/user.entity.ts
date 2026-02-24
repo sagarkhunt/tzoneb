@@ -8,8 +8,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserRole } from '../../enums/user.enum';
+import { RefreshToken } from './refresh-token.entity';
 import { Session } from './session.entity';
+import { UserRole } from './user-role.entity';
 
 @Entity()
 export class User {
@@ -29,9 +30,6 @@ export class User {
   @Column({ type: 'character varying' })
   lastName: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
-  role: UserRole;
-
   @DeleteDateColumn()
   deletedAt: Date;
 
@@ -43,4 +41,10 @@ export class User {
 
   @OneToMany(() => Session, (session) => session.user)
   sessions: Session[];
+
+  @OneToMany(() => UserRole, (ur) => ur.user)
+  userRoles: UserRole[];
+
+  @OneToMany(() => RefreshToken, (rt) => rt.user)
+  refreshTokens: RefreshToken[];
 }

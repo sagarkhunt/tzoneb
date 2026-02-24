@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password, ipAddress } = loginDto;
+    const { email, password } = loginDto;
 
     const user = await this.dataSource.getRepository(User).findOne({
       where: { email },
@@ -53,7 +53,7 @@ export class AuthService {
 
     const session = await this.dataSource
       .getRepository(Session)
-      .save({ userId: user.id, ipAddress });
+      .save({ userId: user.id });
 
     const payload: OAuthPayload = {
       id: user.id,
