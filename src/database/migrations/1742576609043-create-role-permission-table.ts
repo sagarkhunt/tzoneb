@@ -85,9 +85,7 @@ export class CreateRolePermissionTable1742576609043 implements MigrationInterfac
     for (const fk of table.foreignKeys) {
       await queryRunner.dropForeignKey('role_permission', fk);
     }
-    const unique = table.uniques?.find(
-      (u) => u.name === 'role_permission_roleId_permissionId_key',
-    );
+    const unique = table.uniques?.find((u) => u.name === 'role_permission_roleId_permissionId_key');
     if (unique) await queryRunner.dropUniqueConstraint('role_permission', unique);
     await queryRunner.dropTable('role_permission');
   }

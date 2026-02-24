@@ -3,7 +3,11 @@
  * Matches tzoneb copy Prisma seed: role (display name), slug (machine name), description.
  */
 export const ROLES_SEED = [
-  { role: 'Super Admin', slug: 'super_admin', description: 'Super Administrator with full system access' },
+  {
+    role: 'Super Admin',
+    slug: 'super_admin',
+    description: 'Super Administrator with full system access',
+  },
   { role: 'Admin', slug: 'admin', description: 'Administrator role with user management access' },
   { role: 'Manager', slug: 'manager', description: 'Manager role with employee management access' },
   { role: 'Finance', slug: 'finance', description: 'Finance role with financial data access' },

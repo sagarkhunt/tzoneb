@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableIndex,
-  TableUnique,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex, TableUnique } from 'typeorm';
 
 export class CreatePermissionTable1742576609042 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {

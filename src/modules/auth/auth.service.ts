@@ -51,9 +51,7 @@ export class AuthService {
 
     this.bcryptService.compareSync(password, user.password);
 
-    const session = await this.dataSource
-      .getRepository(Session)
-      .save({ userId: user.id });
+    const session = await this.dataSource.getRepository(Session).save({ userId: user.id });
 
     const payload: OAuthPayload = {
       id: user.id,

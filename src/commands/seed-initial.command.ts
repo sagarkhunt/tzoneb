@@ -93,7 +93,10 @@ export class SeedInitialCommand extends CommandRunner {
     }
 
     this.logger.log('Seed complete.');
-    this.logger.log('Super Admin: superadmin@tzone.com / ' + (process.env.SUPER_ADMIN_PASSWORD ? '[from env]' : 'SuperAdmin@123'));
+    this.logger.log(
+      'Super Admin: superadmin@tzone.com / ' +
+        (process.env.SUPER_ADMIN_PASSWORD ? '[from env]' : 'SuperAdmin@123'),
+    );
     this.logger.log('Admin: admin@example.com / admin123');
   }
 }

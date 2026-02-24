@@ -107,9 +107,7 @@ export class CreateUserRolesTable1742576609041 implements MigrationInterface {
     for (const fk of table.foreignKeys) {
       await queryRunner.dropForeignKey('user_roles', fk);
     }
-    const uniqueConstraint = table.uniques?.find(
-      (u) => u.name === 'user_roles_userId_roleId_key',
-    );
+    const uniqueConstraint = table.uniques?.find((u) => u.name === 'user_roles_userId_roleId_key');
     if (uniqueConstraint) {
       await queryRunner.dropUniqueConstraint('user_roles', uniqueConstraint);
     }

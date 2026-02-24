@@ -1,10 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-  TableIndex,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
 export class CreateRolesTable1742576609040 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -66,9 +60,7 @@ export class CreateRolesTable1742576609040 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable('roles');
     if (!table) return;
-    const fk = table.foreignKeys.find(
-      (k) => k.columnNames.indexOf('parentRoleId') !== -1,
-    );
+    const fk = table.foreignKeys.find((k) => k.columnNames.indexOf('parentRoleId') !== -1);
     if (fk) await queryRunner.dropForeignKey('roles', fk);
     await queryRunner.dropTable('roles');
   }
