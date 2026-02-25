@@ -101,8 +101,6 @@ export class OrganizationsService {
       if (existing) throw new ConflictException('Organization name already exists');
     }
 
-   
-
     Object.assign(org, {
       ...(dto.name !== undefined && { name: dto.name }),
       ...(dto.licenseCount !== undefined && { licenseCount: dto.licenseCount }),
