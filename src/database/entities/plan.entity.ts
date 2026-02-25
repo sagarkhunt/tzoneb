@@ -28,8 +28,11 @@ export class Plan {
   @Column({ type: 'boolean', name: 'isActive', default: true })
   isActive: boolean;
 
-  @Column({ type: 'uuid', name: 'createdBy', nullable: true })
-  createdById: string | null;
+  @Column({ type: 'integer', name: 'pricePerUser', default: 0 })
+  pricePerUser: number;
+
+  @Column({ type: 'text', nullable: true })
+  cycle: string | null;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'createdBy' })

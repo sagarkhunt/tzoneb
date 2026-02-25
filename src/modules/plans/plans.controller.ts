@@ -1,64 +1,58 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UsePipes } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UsePipes } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../../decorators/auth.decorator';
 import { UserRole } from '../../enums/user.enum';
 import { ValidationPipe } from '../../pipes/validation.pipe';
-import { CreatePlanDto, UpdatePlanDto } from './plans.dto';
+import { CreatePlanDto, GetPlansQueryDto, UpdatePlanDto } from './plans.dto';
 import { PlansService } from './plans.service';
+import { User } from 'src/database/entities/user.entity';
+import { AuthUser } from 'src/decorators/user.decorator';
 
 @ApiTags('Plans')
 @ApiBearerAuth()
 @Auth()
-@Controller('plans')
+@Controller()
 @UsePipes(new ValidationPipe({ whitelist: true }))
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}
 
   @Post()
   @Auth([UserRole.ADMIN])
-  @ApiOperation({ summary: 'Create a new plan' })
   @ApiBody({ type: CreatePlanDto })
-  @ApiResponse({ status: 201, description: 'Plan created successfully' })
-  @ApiResponse({ status: 409, description: 'Plan with this name already exists' })
-  create(@Body() dto: CreatePlanDto) {
-    return this.plansService.create(dto);
+  async create(@Body() dto: CreatePlanDto, @AuthUser() user: User) {
+    const data = await this.plansService.create(dto, user);
+    return { data, message: 'Plan created successfully' };
+  }
+
+  @Put(':id')
+  @Auth([UserRole.ADMIN])
+  @ApiOperation({ summary: 'Update plan' })
+  @ApiBody({ type: UpdatePlanDto })
+  async update(@Param('id') id: string, @Body() dto: UpdatePlanDto) {
+    const data = await this.plansService.update(id, dto);
+    return { data, message: 'Plan updated successfully' };
   }
 
   @Get()
   @Auth([UserRole.ADMIN, UserRole.USER])
-  @ApiOperation({ summary: 'Get all plans' })
-  @ApiResponse({ status: 200, description: 'Return all plans with organization count' })
-  findAll() {
-    return this.plansService.findAll();
+  @ApiOperation({ summary: 'List plans' })
+  async findAll(@Query() query: GetPlansQueryDto) {
+    const data = await this.plansService.findAll(query);
+    return { data, message: 'Plans fetched successfully' };
   }
 
   @Get(':id')
   @Auth([UserRole.ADMIN, UserRole.USER])
-  @ApiOperation({ summary: 'Get plan by ID' })
-  @ApiResponse({ status: 200, description: 'Return plan with organization count' })
-  @ApiResponse({ status: 404, description: 'Plan not found' })
-  findOne(@Param('id') id: string) {
-    return this.plansService.findOne(id);
-  }
-
-  @Patch(':id')
-  @Auth([UserRole.ADMIN])
-  @ApiOperation({ summary: 'Update plan' })
-  @ApiBody({ type: UpdatePlanDto })
-  @ApiResponse({ status: 200, description: 'Plan updated successfully' })
-  @ApiResponse({ status: 404, description: 'Plan not found' })
-  @ApiResponse({ status: 409, description: 'Plan name already exists' })
-  update(@Param('id') id: string, @Body() dto: UpdatePlanDto) {
-    return this.plansService.update(id, dto);
+  async findOne(@Param('id') id: string) {
+    const data = await this.plansService.findOne(id);
+    return { data, message: 'Plan fetched successfully' };
   }
 
   @Delete(':id')
   @Auth([UserRole.ADMIN])
   @ApiOperation({ summary: 'Delete plan' })
-  @ApiResponse({ status: 200, description: 'Plan deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Plan not found' })
-  @ApiResponse({ status: 409, description: 'Cannot delete plan with assigned organizations' })
-  remove(@Param('id') id: string) {
-    return this.plansService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.plansService.remove(id);
+    return { message: 'Plan deleted successfully' };
   }
 }

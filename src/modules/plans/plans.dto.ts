@@ -23,10 +23,23 @@ export class CreatePlanDto {
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ description: 'User ID of the creator' })
+  @ApiPropertyOptional({ default: 0, description: 'Price per user' })
   @IsOptional()
-  @IsUUID()
-  createdBy?: string;
+  @IsNumber()
+  @Min(0)
+  pricePerUser?: number;
+
+  @ApiPropertyOptional({ description: 'Billing cycle (e.g. monthly, yearly)' })
+  @IsOptional()
+  @IsString()
+  cycle?: string;
 }
 
 export class UpdatePlanDto extends PartialType(CreatePlanDto) {}
+
+export class GetPlansQueryDto {
+  @ApiPropertyOptional({ enum: ['true', 'false'], description: 'Filter by active status' })
+  @IsOptional()
+  @IsString()
+  isActive?: string;
+}

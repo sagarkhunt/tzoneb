@@ -9,57 +9,88 @@ import { DataSource } from 'typeorm';
 import { Organization } from '../../database/entities/organization.entity';
 import { Plan } from '../../database/entities/plan.entity';
 import { User } from '../../database/entities/user.entity';
-import { CreatePlanDto, UpdatePlanDto } from './plans.dto';
+import { CreatePlanDto, GetPlansQueryDto, UpdatePlanDto } from './plans.dto';
 
 @Injectable()
 export class PlansService {
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
-  async create(data: CreatePlanDto) {
-    const repo = this.dataSource.getRepository(Plan);
-    const existing = await repo.findOne({ where: { name: data.name } });
+  private getRepository() {
+    return this.dataSource.getRepository(Plan);
+  }
+
+  async create(body: CreatePlanDto, user: User) {
+    const existing = await this.getRepository().findOne({ where: { name: body.name } });
     if (existing) {
       throw new ConflictException('Plan with this name already exists');
     }
-    if (data.createdBy) {
-      const userExists = await this.dataSource.getRepository(User).findOne({
-        where: { id: data.createdBy },
-      });
-      if (!userExists) throw new BadRequestException('Invalid createdBy user ID');
-    }
+
     const description: string[] | null =
-      data.description == null
+      body.description == null
         ? null
-        : Array.isArray(data.description)
-          ? data.description
-          : [data.description];
-    return repo.save(
-      repo.create({
-        name: data.name,
-        description,
-        price: String(data.price ?? 0),
-        isActive: data.isActive ?? true,
-        createdById: data.createdBy ?? null,
-      }),
-    );
+        : Array.isArray(body.description)
+          ? body.description
+          : [body.description];
+
+    const plan = await this.getRepository().save({
+      name: body.name,
+      description: description ?? null,
+      price: String(body.price ?? 0),
+      isActive: body.isActive ?? true,
+      pricePerUser: body.pricePerUser ?? 0,
+      cycle: body.cycle ?? null,
+      createdBy: user,
+    });
+
+    return this.findOne(plan.id);
   }
 
-  async findAll() {
-    return this.dataSource
-      .getRepository(Plan)
-      .createQueryBuilder('plan')
-      .leftJoinAndSelect('plan.createdBy', 'createdBy')
-      .loadRelationCountAndMap('plan.organizationsCount', 'plan.organizations')
-      .orderBy('plan.name', 'ASC')
-      .getMany();
+  async update(id: string, body: UpdatePlanDto) {
+    const repo = this.getRepository();
+    const plan = await repo.findOne({ where: { id } });
+    if (!plan) {
+      throw new NotFoundException(`Plan with ID ${id} not found`);
+    }
+    if (body.name !== undefined && body.name !== plan.name) {
+      const existing = await repo.findOne({ where: { name: body.name } });
+      if (existing) {
+        throw new ConflictException('Plan with this name already exists');
+      }
+    }
+
+    const description: string[] | null | undefined =
+      body.description === undefined
+        ? undefined
+        : body.description == null
+          ? null
+          : Array.isArray(body.description)
+            ? body.description
+            : [body.description];
+    Object.assign(plan, {
+      ...(body.name !== undefined && { name: body.name }),
+      ...(description !== undefined && { description }),
+      ...(body.price !== undefined && { price: String(body.price) }),
+      ...(body.isActive !== undefined && { isActive: body.isActive }),
+      ...(body.pricePerUser !== undefined && { pricePerUser: body.pricePerUser }),
+      ...(body.cycle !== undefined && { cycle: body.cycle ?? null }),
+    });
+    return await repo.save(plan);
+  }
+
+  async findAll(query: GetPlansQueryDto) {
+    const qb = this.getRepository().createQueryBuilder('plan').orderBy('plan.price', 'ASC');
+
+    if (query.isActive !== undefined && query.isActive !== '') {
+      const active = query.isActive === 'true';
+      qb.andWhere('plan.isActive = :isActive', { isActive: active });
+    }
+
+    return qb.getMany();
   }
 
   async findOne(id: string) {
-    const plan = await this.dataSource
-      .getRepository(Plan)
+    const plan = await this.getRepository()
       .createQueryBuilder('plan')
-      .leftJoinAndSelect('plan.createdBy', 'createdBy')
-      .loadRelationCountAndMap('plan.organizationsCount', 'plan.organizations')
       .where('plan.id = :id', { id })
       .getOne();
     if (!plan) {
@@ -68,57 +99,20 @@ export class PlansService {
     return plan;
   }
 
-  async update(id: string, data: UpdatePlanDto) {
-    const repo = this.dataSource.getRepository(Plan);
-    const plan = await repo.findOne({ where: { id } });
-    if (!plan) {
-      throw new NotFoundException(`Plan with ID ${id} not found`);
-    }
-    if (data.name !== undefined && data.name !== plan.name) {
-      const existing = await repo.findOne({ where: { name: data.name } });
-      if (existing) {
-        throw new ConflictException('Plan with this name already exists');
-      }
-    }
-    if (data.createdBy !== undefined && data.createdBy) {
-      const userExists = await this.dataSource.getRepository(User).findOne({
-        where: { id: data.createdBy },
-      });
-      if (!userExists) throw new BadRequestException('Invalid createdBy user ID');
-    }
-    const description: string[] | null | undefined =
-      data.description === undefined
-        ? undefined
-        : data.description == null
-          ? null
-          : Array.isArray(data.description)
-            ? data.description
-            : [data.description];
-    Object.assign(plan, {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(description !== undefined && { description }),
-      ...(data.price !== undefined && { price: String(data.price) }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
-      ...(data.createdBy !== undefined && { createdById: data.createdBy ?? null }),
-    });
-    return repo.save(plan);
-  }
-
   async remove(id: string) {
-    const repo = this.dataSource.getRepository(Plan);
+    console.log(id);
+    const repo = this.getRepository();
     const plan = await repo.findOne({ where: { id } });
-    if (!plan) {
-      throw new NotFoundException(`Plan with ID ${id} not found`);
-    }
+    if (!plan) throw new NotFoundException(`Plan with ID not found`);
+
     const orgCount = await this.dataSource.getRepository(Organization).count({
       where: { planId: id },
     });
-    if (orgCount > 0) {
+    if (orgCount > 0)
       throw new ConflictException(
         'Cannot delete plan with assigned organizations. Reassign organizations first.',
       );
-    }
-    await repo.remove(plan);
-    return { deleted: true };
+
+    return await repo.remove(plan);
   }
 }

@@ -18,6 +18,9 @@ export class Organization {
   @Column({ type: 'text' })
   name: string;
 
+  @Column({ type: 'text', name: 'orgId', unique: true, insert: false })
+  orgId: string;
+
   @Column({ type: 'uuid', name: 'userId', nullable: true })
   userId: string | null;
 
