@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UsePipes } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UsePipes } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../../decorators/auth.decorator';
 import { UserRole } from '../../enums/user.enum';
@@ -12,22 +12,30 @@ import { OrganizationsService } from './organizations.service';
 import { User } from 'src/database/entities/user.entity';
 import { AuthUser } from 'src/decorators/user.decorator';
 
-@ApiTags('Organizations')
-@ApiBearerAuth()
-@Auth()
-@Controller('organizations')
+@Controller()
 @UsePipes(new ValidationPipe({ whitelist: true }))
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Post()
   @Auth([UserRole.ADMIN])
-  @ApiOperation({ summary: 'Create a new organization' })
   @ApiBody({ type: CreateOrganizationDto })
-  create(@Body() dto: CreateOrganizationDto, @AuthUser() user: User) {
+  async create(@Body() dto: CreateOrganizationDto, @AuthUser() user: User) {
+    const data = await this.organizationsService.create(dto, user);
     return {
-      data: this.organizationsService.create(dto, user),
+      data,
       message: 'Organization created successfully',
+    };
+  }
+
+  @Put(':id')
+  @Auth([UserRole.ADMIN])
+  @ApiBody({ type: UpdateOrganizationDto })
+  async update(@Param('id') id: string, @Body() dto: UpdateOrganizationDto) {
+    const data = await this.organizationsService.update(id, dto);
+    return {
+      data,
+      message: 'Organization updated successfully',
     };
   }
 
@@ -78,17 +86,6 @@ export class OrganizationsController {
       data: this.organizationsService.findOne(id),
       message: 'Organization retrieved successfully',
     };
-  }
-
-  @Patch(':id')
-  @Auth([UserRole.ADMIN])
-  @ApiOperation({ summary: 'Update organization' })
-  @ApiBody({ type: UpdateOrganizationDto })
-  @ApiResponse({ status: 200, description: 'Organization updated successfully' })
-  @ApiResponse({ status: 404, description: 'Organization not found' })
-  @ApiResponse({ status: 409, description: 'Organization name already exists' })
-  update(@Param('id') id: string, @Body() dto: UpdateOrganizationDto) {
-    return this.organizationsService.update(id, dto);
   }
 
   @Delete(':id')

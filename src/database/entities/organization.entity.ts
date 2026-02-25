@@ -4,10 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Plan } from './plan.entity';
+import { PurchasePlan } from './purchase-plan.entity';
 import { User } from './user.entity';
 
 @Entity('organizations')
@@ -28,12 +29,8 @@ export class Organization {
   @JoinColumn({ name: 'userId' })
   user: User | null;
 
-  @Column({ type: 'text', name: 'planid', nullable: true })
-  planId: string | null;
-
-  @ManyToOne(() => Plan, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'planid' })
-  plan: Plan | null;
+  @OneToMany(() => PurchasePlan, (pp) => pp.organization)
+  purchasePlans: PurchasePlan[];
 
   @Column({ type: 'integer', name: 'licenseCount', default: 0 })
   licenseCount: number;

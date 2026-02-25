@@ -1,4 +1,9 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  OmitType,
+  PartialType,
+} from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
@@ -15,6 +20,7 @@ import {
 export class CreateOrganizationDto {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @ApiProperty()
@@ -24,13 +30,18 @@ export class CreateOrganizationDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsUUID()
-  userId?: string;
+  @IsString()
+  adminFirstName?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  adminLastName?: string;
+
+  @ApiProperty({ description: 'Plan ID for the organization purchase' })
   @IsUUID()
-  planId?: string;
+  @IsNotEmpty()
+  planId: string;
 
   @ApiPropertyOptional({ default: 0 })
   @IsOptional()
@@ -44,7 +55,9 @@ export class CreateOrganizationDto {
   isActive?: boolean;
 }
 
-export class UpdateOrganizationDto extends PartialType(CreateOrganizationDto) {}
+export class UpdateOrganizationDto extends PartialType(
+  OmitType(CreateOrganizationDto, ['adminEmail', 'adminFirstName', 'adminLastName', 'planId']),
+) {}
 
 export class FindOrganizationsQueryDto {
   @ApiPropertyOptional()

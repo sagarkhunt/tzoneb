@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { Organization } from '../../database/entities/organization.entity';
 import { Plan } from '../../database/entities/plan.entity';
+import { PurchasePlan } from '../../database/entities/purchase-plan.entity';
 import { User } from '../../database/entities/user.entity';
 import { CreatePlanDto, GetPlansQueryDto, UpdatePlanDto } from './plans.dto';
 
@@ -105,12 +105,12 @@ export class PlansService {
     const plan = await repo.findOne({ where: { id } });
     if (!plan) throw new NotFoundException(`Plan with ID not found`);
 
-    const orgCount = await this.dataSource.getRepository(Organization).count({
+    const purchaseCount = await this.dataSource.getRepository(PurchasePlan).count({
       where: { planId: id },
     });
-    if (orgCount > 0)
+    if (purchaseCount > 0)
       throw new ConflictException(
-        'Cannot delete plan with assigned organizations. Reassign organizations first.',
+        'Cannot delete plan with active purchases. Reassign or remove purchases first.',
       );
 
     return await repo.remove(plan);

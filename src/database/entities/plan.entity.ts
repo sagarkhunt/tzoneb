@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Organization } from './organization.entity';
+import { PurchasePlan } from './purchase-plan.entity';
 import { User } from './user.entity';
 
 @Entity('plans')
@@ -44,6 +44,6 @@ export class Plan {
   @UpdateDateColumn({ name: 'updatedAt' })
   updatedAt: Date;
 
-  @OneToMany(() => Organization, (org) => org.plan)
-  organizations: Organization[];
+  @OneToMany(() => PurchasePlan, (pp) => pp.plan)
+  purchasePlans: PurchasePlan[];
 }

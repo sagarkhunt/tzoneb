@@ -8,9 +8,6 @@ import { PlansService } from './plans.service';
 import { User } from 'src/database/entities/user.entity';
 import { AuthUser } from 'src/decorators/user.decorator';
 
-@ApiTags('Plans')
-@ApiBearerAuth()
-@Auth()
 @Controller()
 @UsePipes(new ValidationPipe({ whitelist: true }))
 export class PlansController {
