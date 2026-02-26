@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
+  IsEnum,
   IsIn,
   IsInt,
   IsNotEmpty,
@@ -11,6 +12,7 @@ import {
   Length,
   Min,
 } from 'class-validator';
+import { OrganizationStatus } from '../../enums/organization.enum';
 
 export class CreateOrganizationDto {
   @ApiProperty()
@@ -44,6 +46,11 @@ export class CreateOrganizationDto {
   @IsInt()
   @Min(0)
   licenseCount?: number;
+
+  @ApiPropertyOptional({ enum: OrganizationStatus, default: OrganizationStatus.ACTIVE })
+  @IsOptional()
+  @IsEnum(OrganizationStatus)
+  status?: OrganizationStatus;
 
   @ApiPropertyOptional({ default: true })
   @IsOptional()
@@ -85,8 +92,11 @@ export class FindOrganizationsQueryDto {
   @IsString()
   planId?: string;
 
-  @ApiPropertyOptional({ enum: ['active', 'inactive'], description: 'Filter by status' })
+  @ApiPropertyOptional({
+    enum: OrganizationStatus,
+    description: 'Filter by status (trial, active, inactive)',
+  })
   @IsOptional()
-  @IsIn(['active', 'inactive'])
-  status?: 'active' | 'inactive';
+  @IsIn([OrganizationStatus.TRIAL, OrganizationStatus.ACTIVE, OrganizationStatus.INACTIVE])
+  status?: OrganizationStatus;
 }

@@ -7,6 +7,7 @@ import {
   OneToMany,
   UpdateDateColumn,
 } from 'typeorm';
+import { OrganizationStatus } from '../../enums/organization.enum';
 import { BaseEntity } from './base.entity';
 import { PurchasePlan } from './purchase-plan.entity';
 import { User } from './user.entity';
@@ -31,6 +32,13 @@ export class Organization extends BaseEntity {
 
   @Column({ type: 'integer', name: 'licenseCount', default: 0 })
   licenseCount: number;
+
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: OrganizationStatus.ACTIVE,
+  })
+  status: OrganizationStatus;
 
   @Column({ type: 'boolean', name: 'isActive', default: true })
   isActive: boolean;

@@ -1,37 +1,37 @@
-import { RoleName, RoleSlug } from '../../../enums/role.enum';
+import { UserRole, RoleSlug } from '../../../enums/role.enum';
 
 /**
  * Roles to seed into the `roles` table.
- * Uses RoleSlug and RoleName enums for consistency.
+ * Uses RoleSlug and UserRole enums for consistency.
  */
 export const ROLES_SEED = [
   {
-    role: RoleName.SUPER_ADMIN,
+    role: UserRole.SUPER_ADMIN,
     slug: RoleSlug.SUPER_ADMIN,
     description: 'Super Administrator with full system access',
   },
   {
-    role: RoleName.ADMIN,
+    role: UserRole.ADMIN,
     slug: RoleSlug.ADMIN,
     description: 'Administrator role with user management access',
   },
   {
-    role: RoleName.MANAGER,
+    role: UserRole.MANAGER,
     slug: RoleSlug.MANAGER,
     description: 'Manager role with employee management access',
   },
   {
-    role: RoleName.FINANCE,
+    role: UserRole.FINANCE,
     slug: RoleSlug.FINANCE,
     description: 'Finance role with financial data access',
   },
   {
-    role: RoleName.COMPANY,
+    role: UserRole.COMPANY,
     slug: RoleSlug.COMPANY,
     description: 'Company role with organization-level access',
   },
   {
-    role: RoleName.EMPLOYEE,
+    role: UserRole.EMPLOYEE,
     slug: RoleSlug.EMPLOYEE,
     description: 'Employee role with basic user access',
   },

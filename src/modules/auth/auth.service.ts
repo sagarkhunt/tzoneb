@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   private async issueTokensForUser(user: UserWithRoles) {
-    const roles = this.getRoleNames(user);
+    const roles = this.getUserRoles(user);
     const signOptions = { expiresIn: this.authConfig.accessTokenExpiry } as Parameters<
       JwtService['signAsync']
     >[1];
@@ -126,7 +126,7 @@ export class AuthService {
     };
   }
 
-  private getRoleNames(user: UserWithRoles): string[] {
+  private getUserRoles(user: UserWithRoles): string[] {
     return user.userRoles?.map((ur) => ur.role.role) ?? [];
   }
 

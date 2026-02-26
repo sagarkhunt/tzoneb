@@ -7,12 +7,13 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { FastifyRequest } from 'fastify';
+import { RoleSlug } from '../enums/role.enum';
 import { UserRole } from '../enums/user.enum';
 
-const ROLE_TO_SLUGS: Record<UserRole, string[]> = {
-  [UserRole.ADMIN]: ['admin', 'super_admin'],
-  [UserRole.SUPER_ADMIN]: ['super_admin'],
-  [UserRole.USER]: ['employee', 'user', 'manager', 'company', 'finance'],
+const ROLE_TO_SLUGS: Record<UserRole, RoleSlug[]> = {
+  [UserRole.ADMIN]: [RoleSlug.ADMIN, RoleSlug.SUPER_ADMIN],
+  [UserRole.SUPER_ADMIN]: [RoleSlug.SUPER_ADMIN],
+  [UserRole.USER]: [RoleSlug.EMPLOYEE, RoleSlug.MANAGER, RoleSlug.COMPANY, RoleSlug.FINANCE],
 };
 
 @Injectable()

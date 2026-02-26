@@ -13,7 +13,7 @@ export enum RoleSlug {
 /**
  * Display names for roles (for UI / API responses)
  */
-export enum RoleName {
+export enum UserRole {
   SUPER_ADMIN = 'Super Admin',
   ADMIN = 'Admin',
   MANAGER = 'Manager',

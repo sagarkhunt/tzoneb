@@ -21,6 +21,7 @@ import { BcryptService } from 'src/services/bcrypt.service';
 import { generateSecurePassword } from 'src/services/password.util';
 import { PurchasePlan } from 'src/database/entities/purchase-plan.entity';
 import { Plan } from 'src/database/entities/plan.entity';
+import { OrganizationStatus } from 'src/enums/organization.enum';
 
 @Injectable()
 export class OrganizationsService {
@@ -69,6 +70,7 @@ export class OrganizationsService {
       name: body.name,
       userId: savedAdmin.id,
       licenseCount: body.licenseCount ?? 0,
+      status: body.status ?? OrganizationStatus.ACTIVE,
       isActive: body.isActive ?? true,
     });
     const savedOrg = await orgRepo.save(org);
@@ -129,6 +131,7 @@ export class OrganizationsService {
     Object.assign(org, {
       ...(dto.name !== undefined && { name: dto.name }),
       ...(dto.licenseCount !== undefined && { licenseCount: dto.licenseCount }),
+      ...(dto.status !== undefined && { status: dto.status }),
       ...(dto.isActive !== undefined && { isActive: dto.isActive }),
     });
     return orgRepo.save(org);
@@ -161,8 +164,9 @@ export class OrganizationsService {
         { planId: planId.trim() },
       );
     }
-    if (status === 'active') qb.andWhere('org.isActive = :active', { active: true });
-    if (status === 'inactive') qb.andWhere('org.isActive = :active', { active: false });
+    if (status) {
+      qb.andWhere('org.status = :status', { status });
+    }
 
     if (cursor?.trim()) {
       const cursorOrg = await repo.findOne({
