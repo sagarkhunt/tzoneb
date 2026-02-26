@@ -5,24 +5,21 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseEntity } from './base.entity';
 import { PurchasePlan } from './purchase-plan.entity';
 import { User } from './user.entity';
 
 @Entity('organizations')
-export class Organization {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Organization extends BaseEntity {
   @Column({ type: 'text' })
   name: string;
 
   @Column({ type: 'text', name: 'orgId', unique: true, insert: false })
   orgId: string;
 
-  @Column({ type: 'uuid', name: 'userId', nullable: true })
+  @Column({ type: 'char', length: 26, name: 'userId', nullable: true })
   userId: string | null;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })

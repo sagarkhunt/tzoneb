@@ -5,19 +5,16 @@ import {
   DeleteDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseEntity } from './base.entity';
 import { Organization } from './organization.entity';
 import { Plan } from './plan.entity';
 import { RefreshToken } from './refresh-token.entity';
 import { UserRole } from './user-role.entity';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class User extends BaseEntity {
   @Column({ type: 'character varying', unique: true })
   email: string;
 

@@ -6,16 +6,13 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseEntity } from './base.entity';
 import { RolePermission } from './role-permission.entity';
 
 @Entity('roles')
-export class Role {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Role extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
   role: string;
 
@@ -25,7 +22,7 @@ export class Role {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'char', length: 26, nullable: true })
   parentRoleId: string | null;
 
   @ManyToOne(() => Role, (r) => r.childRoles, { nullable: true, onDelete: 'SET NULL' })

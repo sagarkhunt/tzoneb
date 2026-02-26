@@ -36,12 +36,13 @@ export class CreateAdminUserCommand extends CommandRunner {
 
     const role = await this.dataSource.getRepository(Role).findOneBy({ slug: 'admin' });
     if (role) {
-      await this.dataSource.getRepository(UserRoleEntity).save({
+      const userRole = this.dataSource.getRepository(UserRoleEntity).create({
         userId: savedUser.id,
         roleId: role.id,
         addedById: null,
         organizationId: null,
       });
+      await this.dataSource.getRepository(UserRoleEntity).save(userRole);
     }
 
     this.logger.warn(await userRepo.findOneBy({ id: savedUser.id }));

@@ -8,13 +8,12 @@ export class CreateRefreshTokensTable1742576609044 implements MigrationInterface
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'char',
+            length: '26',
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v1()',
           },
           { name: 'token', type: 'text' },
-          { name: 'userId', type: 'uuid' },
+          { name: 'userId', type: 'char', length: '26' },
           {
             name: 'expiresAt',
             type: 'timestamp with time zone',

@@ -14,7 +14,7 @@ export class PlansController {
   constructor(private readonly plansService: PlansService) {}
 
   @Post()
-  @Auth([UserRole.ADMIN])
+  @Auth([UserRole.SUPER_ADMIN, UserRole.ADMIN])
   @ApiBody({ type: CreatePlanDto })
   async create(@Body() dto: CreatePlanDto, @AuthUser() user: User) {
     const data = await this.plansService.create(dto, user);

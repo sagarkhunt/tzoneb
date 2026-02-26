@@ -8,10 +8,9 @@ export class CreateOrganizationsTable1742576609047 implements MigrationInterface
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'char',
+            length: '26',
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v1()',
           },
           { name: 'name', type: 'text' },
           {
@@ -20,8 +19,8 @@ export class CreateOrganizationsTable1742576609047 implements MigrationInterface
             isUnique: true,
             isNullable: false,
           },
-          { name: 'userId', type: 'uuid', isNullable: true },
-          { name: 'planid', type: 'uuid', isNullable: true },
+          { name: 'userId', type: 'char', length: '26', isNullable: true },
+          { name: 'planid', type: 'char', length: '26', isNullable: true },
           { name: 'licenseCount', type: 'integer', default: 0 },
           { name: 'isActive', type: 'boolean', default: true },
           {

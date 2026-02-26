@@ -50,61 +50,39 @@ export class OrganizationsController {
     };
   }
 
-  @Get('stats')
-  @Auth([UserRole.ADMIN, UserRole.USER])
-  @ApiOperation({ summary: 'Get organization statistics' })
-  @ApiResponse({ status: 200, description: 'Return organization stats' })
-  getStats() {
-    return {
-      data: this.organizationsService.getStats(),
-      message: 'Organization stats retrieved successfully',
-    };
-  }
-
   @Get('export')
   @Auth([UserRole.ADMIN, UserRole.USER])
-  @ApiOperation({ summary: 'Export all organizations' })
-  @ApiResponse({ status: 200, description: 'Return all organizations' })
-  exportAll() {
+  async exportAll() {
     return {
-      data: this.organizationsService.findAllForExport(),
+      data: await this.organizationsService.findAllForExport(),
       message: 'Organizations exported successfully',
     };
   }
 
   @Get()
   @Auth([UserRole.ADMIN, UserRole.USER])
-  @ApiOperation({ summary: 'Get organizations with search, pagination and filters' })
-  @ApiResponse({ status: 200, description: 'Return paginated organizations' })
-  findAll(@Query() query: FindOrganizationsQueryDto) {
-    return this.organizationsService.findAll({
-      search: query.search?.trim() || undefined,
-      page: query.page ?? 1,
-      limit: query.limit ?? 10,
-      userId: query.userId?.trim() || undefined,
-      planId: query.planId?.trim() || undefined,
-      status: query.status,
-    });
+  async findAll(@Query() query: FindOrganizationsQueryDto) {
+    const data = await this.organizationsService.findAll(query);
+    return {
+      data,
+      message: 'Organizations retrieved successfully',
+    };
   }
 
   @Get(':id')
   @Auth([UserRole.ADMIN, UserRole.USER])
-  @ApiOperation({ summary: 'Get organization by ID' })
-  @ApiResponse({ status: 200, description: 'Return organization with plan details' })
-  @ApiResponse({ status: 404, description: 'Organization not found' })
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
+    const data = await this.organizationsService.findOne(id);
     return {
-      data: this.organizationsService.findOne(id),
+      data,
       message: 'Organization retrieved successfully',
     };
   }
 
   @Delete(':id')
   @Auth([UserRole.ADMIN])
-  @ApiOperation({ summary: 'Delete organization' })
-  @ApiResponse({ status: 200, description: 'Organization deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Organization not found' })
-  remove(@Param('id') id: string) {
-    return this.organizationsService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.organizationsService.remove(id);
+    return { message: 'Organization deleted successfully' };
   }
 }

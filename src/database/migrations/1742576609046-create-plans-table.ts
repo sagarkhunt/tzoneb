@@ -8,10 +8,9 @@ export class CreatePlansTable1742576609046 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'char',
+            length: '26',
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v1()',
           },
           { name: 'name', type: 'text' },
           { name: 'description', type: 'text', isArray: true, isNullable: true },
@@ -23,7 +22,7 @@ export class CreatePlansTable1742576609046 implements MigrationInterface {
             default: 0,
           },
           { name: 'isActive', type: 'boolean', default: true },
-          { name: 'createdBy', type: 'uuid', isNullable: true },
+          { name: 'createdBy', type: 'char', length: '26', isNullable: true },
           {
             name: 'createdAt',
             type: 'timestamp with time zone',

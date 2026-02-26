@@ -10,7 +10,7 @@ export class DropPlanIdFromOrganizationsTable1742576609053 implements MigrationI
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "organizations" ADD "planid" uuid`);
+    await queryRunner.query(`ALTER TABLE "organizations" ADD "planid" char(26)`);
     await queryRunner.query(
       `ALTER TABLE "organizations" ADD CONSTRAINT "FK_organizations_plan" FOREIGN KEY ("planid") REFERENCES "plans"("id") ON DELETE SET NULL`,
     );

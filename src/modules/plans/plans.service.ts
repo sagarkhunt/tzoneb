@@ -32,15 +32,17 @@ export class PlansService {
           ? body.description
           : [body.description];
 
-    const plan = await this.getRepository().save({
+    const planEntity = this.getRepository().create({
       name: body.name,
       description: description ?? null,
       price: String(body.price ?? 0),
       isActive: body.isActive ?? true,
       pricePerUser: body.pricePerUser ?? 0,
+      userPerPlan: body.userPerPlan ?? 1,
       cycle: body.cycle ?? null,
       createdBy: user,
     });
+    const plan = await this.getRepository().save(planEntity);
 
     return this.findOne(plan.id);
   }
@@ -72,6 +74,7 @@ export class PlansService {
       ...(body.price !== undefined && { price: String(body.price) }),
       ...(body.isActive !== undefined && { isActive: body.isActive }),
       ...(body.pricePerUser !== undefined && { pricePerUser: body.pricePerUser }),
+      ...(body.userPerPlan !== undefined && { userPerPlan: body.userPerPlan }),
       ...(body.cycle !== undefined && { cycle: body.cycle ?? null }),
     });
     return await repo.save(plan);
@@ -100,7 +103,6 @@ export class PlansService {
   }
 
   async remove(id: string) {
-    console.log(id);
     const repo = this.getRepository();
     const plan = await repo.findOne({ where: { id } });
     if (!plan) throw new NotFoundException(`Plan with ID not found`);

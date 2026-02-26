@@ -15,13 +15,12 @@ export class CreateRolePermissionTable1742576609043 implements MigrationInterfac
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'char',
+            length: '26',
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v1()',
           },
-          { name: 'roleId', type: 'uuid' },
-          { name: 'permissionId', type: 'uuid' },
+          { name: 'roleId', type: 'char', length: '26' },
+          { name: 'permissionId', type: 'char', length: '26' },
           {
             name: 'deletedAt',
             type: 'timestamp with time zone',

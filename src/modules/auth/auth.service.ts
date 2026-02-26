@@ -30,11 +30,12 @@ export class AuthService {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + this.authConfig.refreshTokenDays);
 
-    await this.dataSource.getRepository(RefreshToken).save({
+    const refreshTokenEntity = this.dataSource.getRepository(RefreshToken).create({
       token,
       userId,
       expiresAt,
     });
+    await this.dataSource.getRepository(RefreshToken).save(refreshTokenEntity);
 
     return token;
   }

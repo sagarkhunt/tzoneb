@@ -5,27 +5,24 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from './role.entity';
+import { BaseEntity } from './base.entity';
 import { Permission } from './permission.entity';
+import { Role } from './role.entity';
 
 @Entity('role_permission')
 @Unique(['roleId', 'permissionId'])
-export class RolePermission {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ type: 'uuid' })
+export class RolePermission extends BaseEntity {
+  @Column({ type: 'char', length: 26 })
   roleId: string;
 
   @ManyToOne(() => Role, (r) => r.rolePermissions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'roleId' })
   role: Role;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'char', length: 26 })
   permissionId: string;
 
   @ManyToOne(() => Permission, (p) => p.rolePermissions, { onDelete: 'CASCADE' })

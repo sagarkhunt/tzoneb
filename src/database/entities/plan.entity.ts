@@ -5,17 +5,14 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseEntity } from './base.entity';
 import { PurchasePlan } from './purchase-plan.entity';
 import { User } from './user.entity';
 
 @Entity('plans')
-export class Plan {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Plan extends BaseEntity {
   @Column({ type: 'text' })
   name: string;
 
@@ -30,6 +27,9 @@ export class Plan {
 
   @Column({ type: 'integer', name: 'pricePerUser', default: 0 })
   pricePerUser: number;
+
+  @Column({ type: 'integer', name: 'userPerPlan', default: 1 })
+  userPerPlan: number;
 
   @Column({ type: 'text', nullable: true })
   cycle: string | null;

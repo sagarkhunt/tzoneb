@@ -8,15 +8,14 @@ export class CreateRolesTable1742576609040 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'char',
+            length: '26',
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v1()',
           },
           { name: 'role', type: 'varchar', isUnique: true },
           { name: 'slug', type: 'varchar', isUnique: true },
           { name: 'description', type: 'text', isNullable: true },
-          { name: 'parentRoleId', type: 'uuid', isNullable: true },
+          { name: 'parentRoleId', type: 'char', length: '26', isNullable: true },
           {
             name: 'deletedAt',
             type: 'timestamp with time zone',

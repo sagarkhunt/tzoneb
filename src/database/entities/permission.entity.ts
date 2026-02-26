@@ -4,18 +4,15 @@ import {
   DeleteDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import { BaseEntity } from './base.entity';
 import { RolePermission } from './role-permission.entity';
 
 @Entity('permission')
 @Unique(['module', 'action'])
-export class Permission {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Permission extends BaseEntity {
   @Column({ type: 'varchar' })
   module: string;
 

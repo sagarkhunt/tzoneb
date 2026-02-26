@@ -5,41 +5,38 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { BaseEntity } from './base.entity';
 import { Role } from './role.entity';
+import { User } from './user.entity';
 
 @Entity('user_roles')
 @Unique(['userId', 'roleId'])
-export class UserRole {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ type: 'uuid' })
+export class UserRole extends BaseEntity {
+  @Column({ type: 'char', length: 26 })
   userId: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'char', length: 26 })
   roleId: string;
 
   @ManyToOne(() => Role, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'roleId' })
   role: Role;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'char', length: 26, nullable: true })
   addedById: string | null;
 
   @ManyToOne(() => User, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'addedById' })
   addedBy: User | null;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'char', length: 26, nullable: true })
   organizationId: string | null;
 
   @DeleteDateColumn({ name: 'deletedAt' })

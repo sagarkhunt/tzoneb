@@ -8,15 +8,14 @@ export class CreatePurchassPlanTable1742576609052 implements MigrationInterface 
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'char',
+            length: '26',
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v1()',
           },
-          { name: 'organizationId', type: 'uuid', isNullable: false },
-          { name: 'planId', type: 'uuid', isNullable: false },
-          { name: 'userId', type: 'uuid', isNullable: false },
-          { name: 'createdBy', type: 'uuid', isNullable: true },
+          { name: 'organizationId', type: 'char', length: '26', isNullable: false },
+          { name: 'planId', type: 'char', length: '26', isNullable: false },
+          { name: 'userId', type: 'char', length: '26', isNullable: false },
+          { name: 'createdBy', type: 'char', length: '26', isNullable: true },
           {
             name: 'deletedAt',
             type: 'timestamp with time zone',

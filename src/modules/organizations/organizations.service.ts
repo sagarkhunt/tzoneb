@@ -54,12 +54,13 @@ export class OrganizationsService {
     });
     const savedAdmin = await userRepo.save(admin);
 
-    await userRoleRepo.save({
+    const userRole = userRoleRepo.create({
       userId: savedAdmin.id,
       roleId: adminRole.id,
       addedById: null,
       organizationId: null,
     });
+    await userRoleRepo.save(userRole);
 
     const existingName = await orgRepo.findOne({ where: { name: body.name } });
     if (existingName) throw new ConflictException('Organization name already exists');
@@ -75,12 +76,13 @@ export class OrganizationsService {
     const plan = await planRepo.findOne({ where: { id: body.planId } });
     if (!plan) throw new BadRequestException('Invalid plan ID');
 
-    await purchasePlanRepo.save({
+    const purchasePlan = purchasePlanRepo.create({
       organizationId: savedOrg.id,
       planId: body.planId,
       userId: savedAdmin.id,
-      createdById: user.id,
+      createdBy: user,
     });
+    await purchasePlanRepo.save(purchasePlan);
 
     // await getAdminCredentialsEmailHtml({
     //   organizationName: savedOrg.name,
@@ -92,13 +94,36 @@ export class OrganizationsService {
   }
 
   async update(id: string, dto: UpdateOrganizationDto) {
-    const repo = this.dataSource.getRepository(Organization);
-    const org = await repo.findOne({ where: { id } });
+    const orgRepo = this.dataSource.getRepository(Organization);
+    const purchasePlanRepo = this.dataSource.getRepository(PurchasePlan);
+    const planRepo = this.dataSource.getRepository(Plan);
+
+    const org = await orgRepo.findOne({ where: { id } });
     if (!org) throw new NotFoundException('Organization not found');
 
     if (dto.name !== undefined && dto.name !== org.name) {
-      const existing = await repo.findOne({ where: { name: dto.name } });
+      const existing = await orgRepo.findOne({ where: { name: dto.name } });
       if (existing) throw new ConflictException('Organization name already exists');
+    }
+
+    if (dto.planId !== undefined) {
+      const plan = await planRepo.findOne({ where: { id: dto.planId } });
+      if (!plan) throw new BadRequestException('Invalid plan ID');
+
+      const activePurchase = await purchasePlanRepo.findOne({
+        where: { organizationId: id },
+      });
+      if (activePurchase) {
+        await purchasePlanRepo.update(activePurchase.id, { planId: dto.planId });
+      } else if (org.userId) {
+        const purchasePlan = purchasePlanRepo.create({
+          organizationId: id,
+          planId: dto.planId,
+          userId: org.userId,
+          createdBy: null,
+        });
+        await purchasePlanRepo.save(purchasePlan);
+      }
     }
 
     Object.assign(org, {
@@ -106,55 +131,73 @@ export class OrganizationsService {
       ...(dto.licenseCount !== undefined && { licenseCount: dto.licenseCount }),
       ...(dto.isActive !== undefined && { isActive: dto.isActive }),
     });
-    return repo.save(org);
+    return orgRepo.save(org);
   }
 
-  async findAll(params: {
-    search?: string;
-    page?: number;
-    limit?: number;
-    userId?: string;
-    planId?: string;
-    status?: 'active' | 'inactive';
-  }) {
-    const { search, page = 1, limit = 10, userId, planId, status } = params;
+  async findAll(query: FindOrganizationsQueryDto) {
+    const { search, cursor, limit = 10, userId, planId, status } = query;
     const repo = this.dataSource.getRepository(Organization);
+
     const qb = repo
       .createQueryBuilder('org')
       .leftJoinAndSelect('org.purchasePlans', 'purchasePlans', 'purchasePlans.deletedAt IS NULL')
       .leftJoinAndSelect('purchasePlans.plan', 'plan')
       .leftJoinAndSelect('org.user', 'user')
-      .orderBy('org.createdAt', 'DESC');
+      .orderBy('org.createdAt', 'DESC')
+      .addOrderBy('org.id', 'DESC')
+      .take(limit + 1);
 
     if (search?.trim()) {
       qb.andWhere('LOWER(org.name) LIKE LOWER(:search)', {
         search: `%${search.trim()}%`,
       });
     }
-    if (userId?.trim()) qb.andWhere('org.userId = :userId', { userId: userId.trim() });
+    if (userId?.trim()) {
+      qb.andWhere('org.userId = :userId', { userId: userId.trim() });
+    }
     if (planId?.trim()) {
-      qb.innerJoin(
-        'org.purchasePlans',
-        'ppFilter',
-        'ppFilter.planId = :planId AND ppFilter.deletedAt IS NULL',
+      qb.andWhere(
+        'EXISTS (SELECT 1 FROM purchass_plan pp WHERE pp."organizationId" = org.id AND pp."planId" = :planId AND pp."deletedAt" IS NULL)',
+        { planId: planId.trim() },
       );
-      qb.setParameter('planId', planId.trim());
-      qb.distinct(true);
     }
     if (status === 'active') qb.andWhere('org.isActive = :active', { active: true });
     if (status === 'inactive') qb.andWhere('org.isActive = :active', { active: false });
 
-    const [items, total] = await qb
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
+    if (cursor?.trim()) {
+      const cursorOrg = await repo.findOne({
+        where: { id: cursor.trim() },
+        select: ['id', 'createdAt'],
+      });
+      if (cursorOrg) {
+        qb.andWhere('(org.createdAt, org.id) < (:cursorCreatedAt, :cursorId)', {
+          cursorCreatedAt: cursorOrg.createdAt,
+          cursorId: cursorOrg.id,
+        });
+      }
+    }
+
+    const items = await qb.getMany();
+    const hasNext = items.length > limit;
+    if (hasNext) items.pop();
+
+    const lastItem = items[items.length - 1];
+    const nextCursor = hasNext && lastItem ? lastItem.id : null;
+
+    const results = items.map((org) => {
+      const { purchasePlans, ...rest } = org;
+      const sorted = (purchasePlans || []).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      const plan = sorted[0]?.plan ?? null;
+      return { ...rest, plan };
+    });
 
     return {
-      items,
-      total,
-      page,
+      results,
+      nextCursor,
+      hasNext: !!nextCursor,
       limit,
-      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -164,6 +207,7 @@ export class OrganizationsService {
       relations: ['purchasePlans', 'purchasePlans.plan', 'user'],
     });
     if (!org) throw new NotFoundException('Organization not found');
+
     return org;
   }
 
@@ -175,26 +219,18 @@ export class OrganizationsService {
     return { deleted: true };
   }
 
-  async getStats() {
-    const repo = this.dataSource.getRepository(Organization);
-    const active = await repo.count({ where: { isActive: true } });
-    const inactive = await repo.count({ where: { isActive: false } });
-    const totalSeats = await repo
-      .createQueryBuilder('org')
-      .select('COALESCE(SUM(org.licenseCount), 0)', 'sum')
-      .getRawOne<{ sum: string }>();
-    return {
-      totalOrganizations: active + inactive,
-      active,
-      inactive,
-      totalSeats: parseInt(totalSeats?.sum ?? '0', 10),
-    };
-  }
-
   async findAllForExport() {
-    return this.dataSource.getRepository(Organization).find({
+    const orgs = await this.dataSource.getRepository(Organization).find({
       relations: ['purchasePlans', 'purchasePlans.plan', 'user'],
       order: { createdAt: 'DESC' },
+    });
+    return orgs.map((org) => {
+      const { purchasePlans, ...rest } = org;
+      const sorted = (purchasePlans || []).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      const plan = sorted[0]?.plan ?? null;
+      return { ...rest, plan };
     });
   }
 }

@@ -8,10 +8,9 @@ export class CreatePermissionTable1742576609042 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'char',
+            length: '26',
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v1()',
           },
           { name: 'module', type: 'varchar' },
           { name: 'action', type: 'varchar' },

@@ -8,7 +8,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
+  Length,
   Min,
 } from 'class-validator';
 
@@ -34,7 +34,8 @@ export class CreateOrganizationDto {
   adminLastName?: string;
 
   @ApiProperty({ description: 'Plan ID for the organization purchase' })
-  @IsUUID()
+  @IsString()
+  @Length(26, 26)
   @IsNotEmpty()
   planId: string;
 
@@ -51,23 +52,23 @@ export class CreateOrganizationDto {
 }
 
 export class UpdateOrganizationDto extends PartialType(
-  OmitType(CreateOrganizationDto, ['adminEmail', 'adminFirstName', 'adminLastName', 'planId']),
+  OmitType(CreateOrganizationDto, ['adminEmail', 'adminFirstName', 'adminLastName']),
 ) {}
 
 export class FindOrganizationsQueryDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Search by organization name' })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ default: 1 })
+  @ApiPropertyOptional({
+    description: 'Cursor for pagination (id of last item from previous response)',
+  })
   @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page?: number = 1;
+  @IsString()
+  cursor?: string;
 
-  @ApiPropertyOptional({ default: 10 })
+  @ApiPropertyOptional({ default: 10, description: 'Items per page' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -79,12 +80,12 @@ export class FindOrganizationsQueryDto {
   @IsString()
   userId?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Filter by plan ID' })
   @IsOptional()
   @IsString()
   planId?: string;
 
-  @ApiPropertyOptional({ enum: ['active', 'inactive'] })
+  @ApiPropertyOptional({ enum: ['active', 'inactive'], description: 'Filter by status' })
   @IsOptional()
   @IsIn(['active', 'inactive'])
   status?: 'active' | 'inactive';

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreatePlanDto {
   @ApiProperty()
@@ -28,6 +28,12 @@ export class CreatePlanDto {
   @IsNumber()
   @Min(0)
   pricePerUser?: number;
+
+  @ApiPropertyOptional({ default: 1, description: 'Users allowed per plan' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  userPerPlan?: number;
 
   @ApiPropertyOptional({ description: 'Billing cycle (e.g. monthly, yearly)' })
   @IsOptional()

@@ -82,12 +82,13 @@ export class SeedInitialCommand extends CommandRunner {
         where: { userId: user.id, roleId: role.id },
       });
       if (!existingUr) {
-        await userRoleRepo.save({
+        const userRole = userRoleRepo.create({
           userId: user.id,
           roleId: role.id,
           addedById: null,
           organizationId: null,
         });
+        await userRoleRepo.save(userRole);
         this.logger.log(`Assigned role ${row.roleSlug} to ${row.email}`);
       }
     }
